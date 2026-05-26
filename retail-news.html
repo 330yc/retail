@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>零售業資訊蒐集系統</title>
+  <style>
+    /* Base Variables & Reset */
+    :root {
+      --main-blue: #003a8c;
+      --bg-color: #f0f2f5;
+      --text-title: #4a4a4a;
+      --text-muted: #8c8c8c;
+      --card-bg: #ffffff;
+      --card-alt-bg: #fcfcfc;
+      --border-color: #f0f0f0;
+    }
+
+    body {
+      font-family: "SF Pro Display", "Helvetica Neue", "Segoe UI", "Microsoft JhengHei", sans-serif;
+      background-color: var(--bg-color);
+      margin: 0;
+      color: #333;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 15px;
+    }
+
+    /* 吸頂區塊 */
+    .sticky-wrapper {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background-color: var(--bg-color);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    }
+
+    /* 標題 */
+    header {
+      background-color: var(--main-blue);
+      color: white;
+      padding: 10px 0;
+    }
+
+    .logo {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    /* 頁籤 */
+    .nav-bar {
+      background-color: #ffffff;
+      padding: 6px 0;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 10px;
+    }
+
+    .tab {
+      padding: 5px 20px;
+      cursor: pointer;
+      font-weight: 600;
+      color: #595959;
+      border-radius: 20px;
+      transition: all 0.2s ease;
+      font-size: 0.9rem;
+      border: 1px solid transparent;
+    }
+
+    .tab:hover {
+      background-color: #f5f5f5;
+    }
+
+    .tab.active {
+      background-color: var(--main-blue);
+      color: white;
+    }
+
+    /* 次級頁籤 */
+    .sub-nav {
+      background-color: #ffffff;
+      padding: 0 0 8px 0;
+    }
+
+    .sub-tabs {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      padding-top: 5px;
+    }
+
+    .sub-tab {
+      font-size: 0.75rem;
+      color: #595959;
+      cursor: pointer;
+      padding: 2px 12px;
+      border-radius: 15px;
+      border: 1px solid #d9d9d9;
+      background-color: #ffffff;
+      transition: all 0.2s ease;
+    }
+
+    .sub-tab:hover {
+      border-color: var(--main-blue);
+      color: var(--main-blue);
+    }
+
+    .sub-tab.active {
+      background-color: #e6f7ff;
+      color: var(--main-blue);
+      border-color: var(--main-blue);
+      font-weight: 600;
+    }
+
+    /* 資料期間 */
+    .data-range {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin: 18px 0 10px 0;
+      text-align: left;
+      font-weight: 400;
+    }
+
+    /* 新聞列表 */
+    .news-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding-bottom: 30px;
+    }
+
+    .news-item {
+      display: flex;
+      background-color: var(--card-bg);
+      padding: 16px 18px;
+      text-decoration: none;
+      color: inherit;
+      border-radius: 8px;
+      align-items: flex-start;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+      border: 1px solid var(--border-color);
+    }
+
+    .news-item:nth-child(even) {
+      background-color: var(--card-alt-bg);
+    }
+
+    .news-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      background-color: #fafafa;
+    }
+
+    .col-date {
+      width: 45px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      flex-shrink: 0;
+      padding-top: 2px;
+      font-weight: 300;
+    }
+
+    .col-content {
+      flex-grow: 1;
+      padding: 0 15px;
+    }
+
+    .col-title {
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: var(--text-title);
+      margin-bottom: 0;
+      line-height: 1.5;
+      display: block;
+    }
+
+    .col-src {
+      width: 120px;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-align: right;
+      flex-shrink: 0;
+      padding-top: 2px;
+      word-break: break-all;
+    }
+
+    #msg {
+      text-align: center;
+      padding: 80px 0;
+      color: var(--text-muted);
+      font-size: 1rem;
+      background-color: var(--card-bg);
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="sticky-wrapper">
+    <header>
+      <div class="container">
+        <div class="logo">零售業資訊蒐集系統</div>
+      </div>
+    </header>
+
+    <div class="nav-bar">
+      <div class="container">
+        <div class="tabs">
+          <div class="tab active" data-type="fe">集團新聞</div>
+          <div class="tab" data-type="comp">同業動態</div>
+          <div class="tab" data-type="trend">產業趨勢</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sub-nav" id="sub-nav-bar">
+      <div class="container">
+        <div id="sub-tabs-container" class="sub-tabs"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <div id="data-range" class="data-range"></div>
+
+    <div id="main-view">
+      <div id="msg">正在讀取資料...</div>
+    </div>
+  </div>
+
+<script>
+  // =============================================
+  // 設定區：Google Sheets 來源
+  // =============================================
+  const SPREADSHEET_ID = "1K_soka3brSnzD-2qGmT1SOnjfDTCf8sUZgGiVDJM4fQ";
+  const SHEETS = {
+    fe:    "遠東零售",
+    comp:  "同業動態",
+    trend: "產業趨勢"
+  };
+
+  // =============================================
+  // 狀態
+  // =============================================
+  let rawData = { fe: [], comp: [], trend: [] };
+  let currentMainTab = 'fe';
+  let currentSubCat = '全部';
+
+  // 次級頁籤定義（與原版一致）
+  const subCatMap = {
+    fe: ["全部", "遠百", "SOGO", "巨城", "遠企", "愛買", "city’super", "Happy Go"],
+    comp: ["全部", "百貨及購物中心", "超商超市量販", "全通路與會員經營"],
+    trend: []
+  };
+
+  // =============================================
+  // 從 Google Sheets 抓資料 (gviz JSON 端點)
+  // =============================================
+  async function fetchSheet(sheetName) {
+    const url = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(sheetName)}`;
+    const res = await fetch(url);
+    const text = await res.text();
+    // gviz 回應格式：/*O_o*/google.visualization.Query.setResponse({...});
+    // 需要切掉前後雜訊，取出中間的 JSON
+    const jsonStr = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
+    return JSON.parse(jsonStr);
+  }
+
+  // 將 gviz 回傳的單筆 row 轉換成前端要的物件
+  // 欄位順序：週別 | 類別 | 日期 | 來源 | 標題 | 連結
+  function parseRow(row) {
+    const cells = row.c || [];
+    const getVal = (idx) => cells[idx] ? cells[idx].v : '';
+    const getFmt = (idx) => cells[idx] && cells[idx].f ? cells[idx].f : (cells[idx] ? cells[idx].v : '');
+
+    // 日期可能是 "Date(2025,10,15)" 格式 (gviz 特有)，轉成 M/D
+    let dateStr = '';
+    const rawDate = getVal(2);
+    if (typeof rawDate === 'string' && rawDate.startsWith('Date(')) {
+      const m = rawDate.match(/Date\((\d+),(\d+),(\d+)/);
+      if (m) {
+        const mo = parseInt(m[2]) + 1; // gviz 月份從 0 開始
+        const da = parseInt(m[3]);
+        dateStr = mo + '/' + da;
+      }
+    } else if (rawDate) {
+      // 後備：若已是字串就直接顯示
+      dateStr = String(rawDate);
+    }
+
+    return {
+      week: String(getVal(0) || ''),
+      cat:  String(getVal(1) || ''),
+      date: dateStr,
+      src:  String(getVal(3) || ''),
+      title:String(getVal(4) || ''),
+      url:  String(getVal(5) || '')
+    };
+  }
+
+  function parseSheetData(gvizJson) {
+    if (!gvizJson.table || !gvizJson.table.rows) return [];
+    return gvizJson.table.rows.map(parseRow).filter(r => r.title); // 過濾空列
+  }
+
+  // =============================================
+  // 初始化：一次抓三個工作表
+  // =============================================
+  async function init() {
+    try {
+      const [feData, compData, trendData] = await Promise.all([
+        fetchSheet(SHEETS.fe),
+        fetchSheet(SHEETS.comp),
+        fetchSheet(SHEETS.trend)
+      ]);
+
+      rawData.fe    = parseSheetData(feData);
+      rawData.comp  = parseSheetData(compData);
+      rawData.trend = parseSheetData(trendData);
+
+      // 從資料中取「週別」當作期間顯示（取第一筆即可，因為同次抓取同週）
+      const sample = rawData.fe[0] || rawData.comp[0] || rawData.trend[0];
+      document.getElementById('data-range').innerText = sample
+        ? "資料期間：" + sample.week
+        : "資料期間：尚無資料";
+
+      setupSubNav('fe');
+      render();
+      setupEvents();
+    } catch (err) {
+      document.getElementById('main-view').innerHTML =
+        `<div id="msg">資料讀取失敗：${err.message}<br><br>請確認 Google Sheets 已開放「知道連結的人可檢視」。</div>`;
+      console.error(err);
+    }
+  }
+
+  // =============================================
+  // 以下渲染與事件邏輯，跟原版保持一致
+  // =============================================
+  function setupSubNav(type) {
+    const container = document.getElementById('sub-tabs-container');
+    const subNavBar = document.getElementById('sub-nav-bar');
+    const cats = subCatMap[type];
+
+    if (cats.length === 0) {
+      subNavBar.style.display = 'none';
+    } else {
+      subNavBar.style.display = 'block';
+      container.innerHTML = cats.map(c =>
+        `<div class="sub-tab ${c === '全部' ? 'active' : ''}" data-cat="${c}">${c}</div>`
+      ).join('');
+      document.querySelectorAll('.sub-tab').forEach(st => {
+        st.onclick = function() {
+          document.querySelectorAll('.sub-tab').forEach(t => t.classList.remove('active'));
+          this.classList.add('active');
+          currentSubCat = this.getAttribute('data-cat');
+          window.scrollTo({ top: 80, behavior: 'smooth' });
+          render();
+        };
+      });
+    }
+  }
+
+  function setupEvents() {
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.onclick = function() {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        this.classList.add('active');
+        currentMainTab = this.getAttribute('data-type');
+        currentSubCat = '全部';
+        setupSubNav(currentMainTab);
+        render();
+      };
+    });
+  }
+
+  function render() {
+    const container = document.getElementById('main-view');
+    let items = rawData[currentMainTab] || [];
+
+    if (currentSubCat !== '全部') {
+      items = items.filter(i => i.cat.split(',').includes(currentSubCat));
+    }
+
+    if (items.length === 0) {
+      container.innerHTML = `<div id="msg">本週暫無 [${currentSubCat}] 相關資料。</div>`;
+      return;
+    }
+
+    container.innerHTML = `<div class="news-list">${items.map(i => `
+      <a href="${i.url}" target="_blank" class="news-item">
+        <div class="col-date">${i.date}</div>
+        <div class="col-content">
+          <span class="col-title">${i.title}</span>
+        </div>
+        <div class="col-src">${i.src}</div>
+      </a>`).join('')}</div>`;
+  }
+
+  init();
+</script>
+</body>
+</html>
