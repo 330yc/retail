@@ -275,35 +275,47 @@
     return JSON.parse(jsonStr);
   }
 
+  // 把 gviz 特有的日期字串 "Date(2026,4,18)" 轉成 JS Date 物件
+  function parseGvizDate(raw) {
+    if (!raw) return null;
+    if (raw instanceof Date) return raw;
+    if (typeof raw === 'string' && raw.startsWith('Date(')) {
+      const m = raw.match(/Date\((\d+),(\d+),(\d+)/);
+      if (m) {
+        return new Date(parseInt(m[1]), parseInt(m[2]), parseInt(m[3]));
+      }
+    }
+    return null;
+  }
+
+  // 格式化：yyyy/MM/dd
+  function formatYMD(d) {
+    if (!d) return '';
+    const mo = String(d.getMonth() + 1).padStart(2, '0');
+    const da = String(d.getDate()).padStart(2, '0');
+    return d.getFullYear() + '/' + mo + '/' + da;
+  }
+
   // 將 gviz 回傳的單筆 row 轉換成前端要的物件
   // 欄位順序：週別 | 類別 | 日期 | 來源 | 標題 | 連結
   function parseRow(row) {
     const cells = row.c || [];
     const getVal = (idx) => cells[idx] ? cells[idx].v : '';
-    const getFmt = (idx) => cells[idx] && cells[idx].f ? cells[idx].f : (cells[idx] ? cells[idx].v : '');
 
-    // 日期可能是 "Date(2025,10,15)" 格式 (gviz 特有)，轉成 M/D
-    let dateStr = '';
-    const rawDate = getVal(2);
-    if (typeof rawDate === 'string' && rawDate.startsWith('Date(')) {
-      const m = rawDate.match(/Date\((\d+),(\d+),(\d+)/);
-      if (m) {
-        const mo = parseInt(m[2]) + 1; // gviz 月份從 0 開始
-        const da = parseInt(m[3]);
-        dateStr = mo + '/' + da;
-      }
-    } else if (rawDate) {
-      // 後備：若已是字串就直接顯示
-      dateStr = String(rawDate);
-    }
+    // 週別：解析成 Date 物件，方便後續計算「start ~ end」
+    const weekDate = parseGvizDate(getVal(0));
+
+    // 日期 (M/D 格式)
+    const dateObj = parseGvizDate(getVal(2));
+    const dateStr = dateObj ? (dateObj.getMonth() + 1) + '/' + dateObj.getDate() : String(getVal(2) || '');
 
     return {
-      week: String(getVal(0) || ''),
-      cat:  String(getVal(1) || ''),
-      date: dateStr,
-      src:  String(getVal(3) || ''),
-      title:String(getVal(4) || ''),
-      url:  String(getVal(5) || '')
+      weekDate: weekDate,
+      cat:   String(getVal(1) || ''),
+      date:  dateStr,
+      src:   String(getVal(3) || ''),
+      title: String(getVal(4) || ''),
+      url:   String(getVal(5) || '')
     };
   }
 
@@ -327,11 +339,16 @@
       rawData.comp  = parseSheetData(compData);
       rawData.trend = parseSheetData(trendData);
 
-      // 從資料中取「週別」當作期間顯示（取第一筆即可，因為同次抓取同週）
+      // 從資料中取「週別」當作期間顯示：起始日為 sheet 中的週別，往後加 6 天為結束日
       const sample = rawData.fe[0] || rawData.comp[0] || rawData.trend[0];
-      document.getElementById('data-range').innerText = sample
-        ? "資料期間：" + sample.week
-        : "資料期間：尚無資料";
+      if (sample && sample.weekDate) {
+        const start = sample.weekDate;
+        const end = new Date(start.getFullYear(), start.getMonth(), start.getDate() + 6);
+        document.getElementById('data-range').innerText =
+          "資料期間：" + formatYMD(start) + " ~ " + formatYMD(end);
+      } else {
+        document.getElementById('data-range').innerText = "資料期間：尚無資料";
+      }
 
       setupSubNav('fe');
       render();
