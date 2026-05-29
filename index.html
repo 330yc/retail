@@ -243,9 +243,9 @@
   // =============================================
   // 設定區：Google Sheets 來源
   // =============================================
-  const SPREADSHEET_ID = "1K_soka3brSnzD-2qGmT1SOnjfDTCf8sUZgGiVDJM4fQ";
+  const SPREADSHEET_ID = "1WIXSFQW5NXXhlZeIbJlxgstZng8b653CsGX85tmNxAA";
   const SHEETS = {
-    fe:    "遠東零售",
+    fe:    "集團新聞",
     comp:  "同業動態",
     trend: "產業趨勢"
   };
@@ -268,7 +268,8 @@
   // 從 Google Sheets 抓資料 (gviz JSON 端點)
   // =============================================
   async function fetchSheet(sheetName) {
-    const url = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(sheetName)}`;
+    // 加上時間戳記破壞 gviz 快取，確保每次都拿到最新資料
+    const url = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(sheetName)}&t=${Date.now()}`;
     const res = await fetch(url);
     const text = await res.text();
     // gviz 回應格式：/*O_o*/google.visualization.Query.setResponse({...});
